@@ -22,7 +22,7 @@ async function main() {
         case 'win32':
         case 'cygwin':
             const systemInfo = await runCmd('systeminfo');
-            const nameVersionRegex = /^OS Name:\s+[A-Za-z0-9 ]*([0-9.]+)[A-Za-z0-9 ]*$/;
+            const nameVersionRegex = /^OS Name:\s+[A-Za-z0-9 ]*?([0-9.]+)[A-Za-z0-9 ]*?$/;
             const matchingLine = systemInfo.split(EOL).find(l => nameVersionRegex.test(l));
             if (matchingLine) {
                 version = matchingLine.replace(nameVersionRegex, '$1');
