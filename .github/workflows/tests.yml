@@ -88,5 +88,6 @@ jobs:
           if [ "${EXPECTED_VERSION}" = '' ]; then
             EXPECTED_VERSION="$(pwsh -Command '[System.Environment]::OSVersion.Version.Major').$(pwsh -Command '[System.Environment]::OSVersion.Version.Minor')"
           fi
+          echo "Expecting: ${EXPECTED_VERSION}"
           echo "${EXPECTED_VERSION}" | grep -q '${{steps.os-version.outputs.version}}'
         shell: bash
