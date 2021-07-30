@@ -84,7 +84,7 @@ jobs:
       - name: Check for reported version
         if: runner.os == 'Windows'
         run: |
-          EXPECTED_VERSION=$(cmd -c systeminfo | grep -oE '^OS Name: +[A-Za-z0-9 .]+$' | grep -oE '[0-9]+')
+          EXPECTED_VERSION=$(systeminfo | grep -oE '^OS Name: +[A-Za-z0-9 .]+$' | grep -oE '[0-9]+')
           if [ "${EXPECTED_VERSION}" = '' ]; then
             EXPECTED_VERSION="$(pwsh -Command '[System.Environment]::OSVersion.Version.Major').$(pwsh -Command '[System.Environment]::OSVersion.Version.Minor')"
           fi
