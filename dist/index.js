@@ -28,6 +28,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(24));
 const exec_1 = __nccwpck_require__(423);
+const os_1 = __nccwpck_require__(87);
 async function runCmd(cmd, args) {
     const output = await exec_1.getExecOutput(cmd, args, {
         failOnStdErr: true,
@@ -46,9 +47,18 @@ async function main() {
             break;
         case 'win32':
         case 'cygwin':
-            const major = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Major']);
-            const minor = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Minor']);
-            version = `${major.trim()}.${minor.trim()}`;
+            const systemInfo = await runCmd('systeminfo');
+            const nameVersionRegex = /^OS Name:\s+[A-Za-z0-9 ]*([0-9.]+)[A-Za-z0-9 ]*$/;
+            const matchingLine = systemInfo.split(os_1.EOL).find(l => nameVersionRegex.test(l));
+            if (matchingLine) {
+                version = matchingLine.replace(nameVersionRegex, '$1');
+            }
+            else {
+                core.warning('Could not find a suitable version in `systeminfo`. Falling back to `[System.Environment]::OSVersion`...');
+                const major = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Major']);
+                const minor = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Minor']);
+                version = `${major.trim()}.${minor.trim()}`;
+            }
             break;
         default:
             throw new Error('Unsupported platform: ' + process.platform);
