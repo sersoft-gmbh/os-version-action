@@ -1,0 +1,87 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore: [ 'dist/*.js' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy-action-code:
+    if: github.event_name == 'push'
+    name: Deploy Action Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install depenedencies
+        run: sudo npm i -g typescript @vercel/ncc
+      - uses: actions/checkout@v2.3.4
+        with:
+          token: ${{secrets.BOT_TOKEN}}
+      - name: Generate action code
+        run: npm run deploy
+      - name: Configure repository
+        run: |
+          git config user.name "${{secrets.BOT_USERNAME}}"
+          git config user.email "${{secrets.BOT_USERNAME}}@users.noreply.github.com"
+      - name: Commit changes
+        run: |
+          if ! git diff --exit-code --quiet; then
+            git add .
+            git commit -m "[AUTO] Update generated code"
+            git push
+          fi
+
+  test:
+    needs: deploy-action-code
+    if: always() && !failure() && !cancelled()
+    name: Test Action
+    strategy:
+      matrix:
+        os:
+          - macos-10.15
+          - macos-11
+          - macos-latest
+          - ubuntu-18.04
+          - ubuntu-20.04
+          - ubuntu-latest
+          - windows-2016
+          - windows-2019
+          - windows-latest
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: Install dependencies
+        if: github.event_name == 'pull_request'
+        run: sudo npm i -g typescript @vercel/ncc
+        shell: bash
+      - uses: actions/checkout@v2
+      - name: Generate action code
+        if: github.event_name == 'pull_request'
+        run: npm run deploy
+        shell: bash
+      - uses: sersoft-gmbh/os-version-action@main
+        if: github.event_name == 'push'
+        id: os-version-main
+      - uses: './'
+        if: github.event_name == 'pull_request'
+        id: os-version-local
+      - id: os-version
+        run: |
+          if [ '${{github.event_name}}' == 'push' ]; then
+            echo "::set-output name=version::${{steps.os-version-main.outputs.version}}"
+          else
+            echo "::set-output name=version::${{steps.os-version-local.outputs.version}}"
+          fi
+        shell: bash
+      - name: Check for reported version
+        if: runner.os == 'Linux'
+        run: lsb_release -sr | grep -q '${{steps.os-version.outputs.version}}'
+        shell: bash
+      - name: Check for reported version
+        if: runner.os == 'macOS'
+        run: sw_vers -productVersion | grep -q '${{steps.os-version.outputs.version}}'
+        shell: bash
+      - name: Check for reported version
+        if: runner.os == 'Windows'
+        run: sw_vers -productVersion | grep -q '${{steps.os-version.outputs.version}}'
+        shell: bash

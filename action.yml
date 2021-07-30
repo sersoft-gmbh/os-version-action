@@ -1,0 +1,12 @@
+name: OS version
+description: Reads the current operating system (os) version
+author: ser.soft GmbH
+outputs:
+  version:
+    description: The current OS version (e.g. `ubuntu 20.04`).
+runs:
+  using: node12
+  main: dist/index.js
+branding:
+  color: gray
+  icon: info
