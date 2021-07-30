@@ -28,7 +28,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(24));
 const exec_1 = __nccwpck_require__(423);
-const os_1 = __nccwpck_require__(87);
 async function runCmd(cmd, args) {
     const output = await exec_1.getExecOutput(cmd, args, {
         failOnStdErr: true,
@@ -37,16 +36,24 @@ async function runCmd(cmd, args) {
     return output.stdout;
 }
 async function main() {
-    const swiftVersionOutput = await runCmd('swift', ['--version']);
-    const lines = swiftVersionOutput.trim().split(os_1.EOL);
-    if (lines.length < 1) {
-        throw new Error('Invalid output from `swift --version`: ' + swiftVersionOutput);
+    let version;
+    switch (process.platform) {
+        case 'linux':
+            version = await runCmd('lsb_release', ['-sr']);
+            break;
+        case 'darwin':
+            version = await runCmd('sw_vers', ['-productVersion']);
+            break;
+        case 'win32':
+        case 'cygwin':
+            const major = await runCmd('[System.Environment]::OSVersion.Version.Major');
+            const minor = await runCmd('[System.Environment]::OSVersion.Version.Minor');
+            version = `${major}.${minor}`;
+            break;
+        default:
+            throw new Error('Unsupported platform: ' + process.platform);
     }
-    const matches = /.*version\s+(\d+\.\d+(\.\d+)?).*/i.exec(lines[0]);
-    if (!matches || matches.length < 2) { // First match is the complete string.
-        throw new Error('Invalid output from `swift --version`: ' + swiftVersionOutput);
-    }
-    core.setOutput('version', matches[1]);
+    core.setOutput('version', version.trim());
 }
 try {
     main().catch(error => core.setFailed(error.message));
