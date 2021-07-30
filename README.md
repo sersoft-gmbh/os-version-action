@@ -19,4 +19,7 @@ The version of the operating system this action is run on (e.g. `20.04` for Ubun
 Use the following snippet to read the current os version:
 ```yaml
 uses: sersoft-gmbh/os-version-action@v1
+id: os-version
 ```
+
+You can then get the version in a later step by using `${{steps.os-version.outputs.version}}`.
