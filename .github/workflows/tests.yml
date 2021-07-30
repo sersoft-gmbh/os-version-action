@@ -83,5 +83,6 @@ jobs:
         shell: bash
       - name: Check for reported version
         if: runner.os == 'Windows'
-        run: sw_vers -productVersion | grep -q '${{steps.os-version.outputs.version}}'
+        run: |
+          "$(pwsh '[System.Environment]::OSVersion.Version.Major').$(pwsh '[System.Environment]::OSVersion.Version.Minor')" | grep -q '${{steps.os-version.outputs.version}}'
         shell: bash

@@ -20,9 +20,9 @@ async function main() {
             break;
         case 'win32':
         case 'cygwin':
-            const major = await runCmd('[System.Environment]::OSVersion.Version.Major');
-            const minor = await runCmd('[System.Environment]::OSVersion.Version.Minor');
-            version = `${major}.${minor}`;
+            const major = await runCmd('pwsh', ['[System.Environment]::OSVersion.Version.Major']);
+            const minor = await runCmd('pwsh', ['[System.Environment]::OSVersion.Version.Minor']);
+            version = `${major.trim()}.${minor.trim()}`;
             break;
         default:
             throw new Error('Unsupported platform: ' + process.platform);
