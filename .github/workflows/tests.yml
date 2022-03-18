@@ -46,11 +46,16 @@ jobs:
           - ubuntu-20.04
           - ubuntu-latest
           - windows-2019
+          - windows-2022
           - windows-latest
     runs-on: ${{matrix.os}}
     steps:
       - name: Install dependencies
-        if: github.event_name == 'pull_request'
+        if: runner.os == 'Windows' && github.event_name == 'pull_request'
+        run: npm i -g typescript @vercel/ncc
+        shell: bash
+      - name: Install dependencies
+        if: runner.os != 'Windows' && github.event_name == 'pull_request'
         run: sudo npm i -g typescript @vercel/ncc
         shell: bash
       - uses: actions/checkout@v3.0.0
