@@ -1,6 +1,6 @@
 {
   "name": "os-version-action",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A GitHub action that reads the operating system (OS) version.",
   "main": "dist/index.js",
   "scripts": {
