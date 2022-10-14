@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy-action-code:
-    if: github.event_name == 'push'
+    if: ${{ github.event_name == 'push' }}
     name: Deploy Action Code
     runs-on: ubuntu-latest
     steps:
@@ -17,24 +17,26 @@ jobs:
         run: sudo npm i -g typescript @vercel/ncc
       - uses: actions/checkout@v3.1.0
         with:
-          token: ${{secrets.BOT_TOKEN}}
+          token: ${{ secrets.BOT_TOKEN }}
       - name: Generate action code
         run: npm run deploy
       - name: Configure repository
+        env:
+          BOT_USERNAME: ${{ secrets.BOT_USERNAME }}
         run: |
-          git config user.name "${{secrets.BOT_USERNAME}}"
-          git config user.email "${{secrets.BOT_USERNAME}}@users.noreply.github.com"
+          git config user.name "${BOT_USERNAME}"
+          git config user.email "${BOT_USERNAME}@users.noreply.github.com"
       - name: Commit changes
         run: |
           if ! git diff --exit-code --quiet; then
             git add .
-            git commit -m "[AUTO] Update generated code"
+            git commit -m '[AUTO] Update generated code'
             git push
           fi
 
   test:
     needs: deploy-action-code
-    if: always() && !failure() && !cancelled()
+    if: ${{ always() && !failure() && !cancelled() }}
     name: Test Action
     strategy:
       matrix:
@@ -48,50 +50,60 @@ jobs:
           - windows-2019
           - windows-2022
           - windows-latest
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Install dependencies
-        if: runner.os == 'Windows' && github.event_name == 'pull_request'
+        if: ${{ runner.os == 'Windows' && github.event_name == 'pull_request' }}
         run: npm i -g typescript @vercel/ncc
         shell: bash
       - name: Install dependencies
-        if: runner.os != 'Windows' && github.event_name == 'pull_request'
+        if: ${{ runner.os != 'Windows' && github.event_name == 'pull_request' }}
         run: sudo npm i -g typescript @vercel/ncc
         shell: bash
       - uses: actions/checkout@v3.1.0
       - name: Generate action code
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' }}
         run: npm run deploy
         shell: bash
       - uses: sersoft-gmbh/os-version-action@main
-        if: github.event_name == 'push'
+        if: ${{ github.event_name == 'push' }}
         id: os-version-main
       - uses: './'
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' }}
         id: os-version-local
       - id: os-version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BRANCH_VERSION: ${{ steps.os-version-main.outputs.version }}
+          LOCAL_VERSION: ${{ steps.os-version-local.outputs.version }}
         run: |
-          if [ '${{github.event_name}}' == 'push' ]; then
-            echo 'version=${{steps.os-version-main.outputs.version}}' >> "${GITHUB_OUTPUT}"
+          if [ "${EVENT_NAME}" == 'push' ]; then
+            echo "version=${BRANCH_VERSION}" >> "${GITHUB_OUTPUT}"
           else
-            echo 'version=${{steps.os-version-local.outputs.version}}' >> "${GITHUB_OUTPUT}"
+            echo "version=${LOCAL_VERSION}" >> "${GITHUB_OUTPUT}"
           fi
         shell: bash
       - name: Check for reported version
-        if: runner.os == 'Linux'
-        run: lsb_release -sr | grep -q '${{steps.os-version.outputs.version}}'
+        if: ${{ runner.os == 'Linux' }}
+        env:
+          DETECTED_VERSION: ${{ steps.os-version.outputs.version }}
+        run: lsb_release -sr | grep -q "${DETECTED_VERSION}"
         shell: bash
       - name: Check for reported version
-        if: runner.os == 'macOS'
-        run: sw_vers -productVersion | grep -q '${{steps.os-version.outputs.version}}'
+        if: ${{ runner.os == 'macOS' }}
+        env:
+          DETECTED_VERSION: ${{ steps.os-version.outputs.version }}
+        run: sw_vers -productVersion | grep -q "${DETECTED_VERSION}"
         shell: bash
       - name: Check for reported version
-        if: runner.os == 'Windows'
+        if: ${{ runner.os == 'Windows' }}
+        env:
+          DETECTED_VERSION: ${{ steps.os-version.outputs.version }}
         run: |
           EXPECTED_VERSION=$(systeminfo | grep -oE '^OS Name: +[A-Za-z0-9 .]+' | grep -oE '[0-9.]+')
           if [ "${EXPECTED_VERSION}" = '' ]; then
             EXPECTED_VERSION="$(pwsh -Command '[System.Environment]::OSVersion.Version.Major').$(pwsh -Command '[System.Environment]::OSVersion.Version.Minor')"
           fi
           echo "Expecting: ${EXPECTED_VERSION}"
-          echo "${EXPECTED_VERSION}" | grep -q '${{steps.os-version.outputs.version}}'
+          echo "${EXPECTED_VERSION}" | grep -q "${DETECTED_VERSION}"
         shell: bash
