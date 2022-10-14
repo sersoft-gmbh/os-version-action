@@ -72,9 +72,9 @@ jobs:
       - id: os-version
         run: |
           if [ '${{github.event_name}}' == 'push' ]; then
-            echo "::set-output name=version::${{steps.os-version-main.outputs.version}}"
+            echo 'version=${{steps.os-version-main.outputs.version}}' >> "${GITHUB_OUTPUT}"
           else
-            echo "::set-output name=version::${{steps.os-version-local.outputs.version}}"
+            echo 'version=${{steps.os-version-local.outputs.version}}' >> "${GITHUB_OUTPUT}"
           fi
         shell: bash
       - name: Check for reported version
