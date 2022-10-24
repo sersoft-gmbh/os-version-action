@@ -5,7 +5,7 @@ import { EOL } from 'os';
 async function runCmd(cmd: string, args?: string[]): Promise<string> {
     const output = await getExecOutput(cmd, args, {
         failOnStdErr: true,
-        silent: !core.isDebug()
+        silent: !core.isDebug(),
     });
     return output.stdout;
 }
