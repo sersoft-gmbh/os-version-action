@@ -36,7 +36,7 @@ const os_1 = __nccwpck_require__(37);
 async function runCmd(cmd, args) {
     const output = await (0, exec_1.getExecOutput)(cmd, args, {
         failOnStdErr: true,
-        silent: !core.isDebug()
+        silent: !core.isDebug(),
     });
     return output.stdout;
 }
