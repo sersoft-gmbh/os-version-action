@@ -6,14 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "deploy": "rm -rf node_modules dist && npm install && npm run build && ncc build lib/main.js -o dist"
+    "pack": "rm -rf dist && ncc build lib/main.js -o dist"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sersoft-gmbh/os-version-action.git"
   },
   "keywords": [
-    "operating system"
+    "operating system",
+    "os"
   ],
   "author": "ser.soft GmbH",
   "license": "Apache-2.0",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.18.8",
+    "@vercel/ncc": "^0.36.1",
     "typescript": "^5.0.2"
   }
 }

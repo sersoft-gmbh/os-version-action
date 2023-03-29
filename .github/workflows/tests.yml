@@ -26,19 +26,10 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install dependencies
-        if: ${{ runner.os == 'Windows' && github.event_name == 'pull_request' }}
-        run: npm i -g typescript @vercel/ncc
-        shell: bash
-      - name: Install dependencies
-        if: ${{ runner.os != 'Windows' && github.event_name == 'pull_request' }}
-        run: sudo npm i -g typescript @vercel/ncc
-        shell: bash
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v3
       - name: Generate action code
         if: ${{ github.event_name == 'pull_request' }}
-        run: npm run deploy
-        shell: bash
+        uses: ./.github/actions/generate-action-code
       - uses: sersoft-gmbh/os-version-action@main
         if: ${{ github.event_name == 'push' }}
         id: os-version-main
