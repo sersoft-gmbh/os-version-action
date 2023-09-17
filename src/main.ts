@@ -2,8 +2,8 @@ import * as core from '@actions/core';
 import { getExecOutput } from '@actions/exec';
 import { EOL } from 'os';
 
-async function runCmd(cmd: string, args?: string[]): Promise<string> {
-    const output = await getExecOutput(cmd, args, {
+async function runCmd(cmd: string, ...args: string[]): Promise<string> {
+    const output = await getExecOutput(cmd, args.length <= 0 ? undefined : args, {
         failOnStdErr: true,
         silent: !core.isDebug(),
     });
@@ -14,10 +14,10 @@ async function main() {
     let version: string;
     switch (process.platform) {
         case 'linux':
-            version = await runCmd('lsb_release', ['-sr']);
+            version = await runCmd('lsb_release', '-sr');
             break;
         case 'darwin':
-            version = await runCmd('sw_vers', ['-productVersion']);
+            version = await runCmd('sw_vers', '-productVersion');
             break;
         case 'win32':
         case 'cygwin':
@@ -28,8 +28,8 @@ async function main() {
                 version = matchingLine.replace(nameVersionRegex, '$1');
             } else {
                 core.warning('Could not find a suitable version in `systeminfo`. Falling back to `[System.Environment]::OSVersion`...');
-                const major = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Major']);
-                const minor = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Minor']);
+                const major = await runCmd('pwsh', '-Command', '[System.Environment]::OSVersion.Version.Major');
+                const minor = await runCmd('pwsh', '-Command', '[System.Environment]::OSVersion.Version.Minor');
                 version = `${major.trim()}.${minor.trim()}`;
             }
             break;

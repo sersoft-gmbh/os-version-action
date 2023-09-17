@@ -33,8 +33,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const exec_1 = __nccwpck_require__(514);
 const os_1 = __nccwpck_require__(37);
-async function runCmd(cmd, args) {
-    const output = await (0, exec_1.getExecOutput)(cmd, args, {
+async function runCmd(cmd, ...args) {
+    const output = await (0, exec_1.getExecOutput)(cmd, args.length <= 0 ? undefined : args, {
         failOnStdErr: true,
         silent: !core.isDebug(),
     });
@@ -44,10 +44,10 @@ async function main() {
     let version;
     switch (process.platform) {
         case 'linux':
-            version = await runCmd('lsb_release', ['-sr']);
+            version = await runCmd('lsb_release', '-sr');
             break;
         case 'darwin':
-            version = await runCmd('sw_vers', ['-productVersion']);
+            version = await runCmd('sw_vers', '-productVersion');
             break;
         case 'win32':
         case 'cygwin':
@@ -59,8 +59,8 @@ async function main() {
             }
             else {
                 core.warning('Could not find a suitable version in `systeminfo`. Falling back to `[System.Environment]::OSVersion`...');
-                const major = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Major']);
-                const minor = await runCmd('pwsh', ['-Command', '[System.Environment]::OSVersion.Version.Minor']);
+                const major = await runCmd('pwsh', '-Command', '[System.Environment]::OSVersion.Version.Major');
+                const minor = await runCmd('pwsh', '-Command', '[System.Environment]::OSVersion.Version.Minor');
                 version = `${major.trim()}.${minor.trim()}`;
             }
             break;

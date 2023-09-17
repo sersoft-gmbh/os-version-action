@@ -12,14 +12,14 @@ _None_
 
 ### `version`
 
-The version of the operating system this action is run on (e.g. `20.04` for Ubuntu 20.04).
+The version of the operating system this action is run on (e.g. `22.04` for Ubuntu 22.04).
 
 ## Example Usage
 
 Use the following snippet to read the current os version:
 ```yaml
-uses: sersoft-gmbh/os-version-action@v2
+uses: sersoft-gmbh/os-version-action@v3
 id: os-version
 ```
 
-You can then get the version in a later step by using `${{steps.os-version.outputs.version}}`.
+You can then get the version in a later step by using `${{ steps.os-version.outputs.version }}`.
