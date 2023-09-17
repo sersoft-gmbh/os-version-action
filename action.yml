@@ -3,9 +3,9 @@ description: Reads the current operating system (os) version
 author: ser.soft GmbH
 outputs:
   version:
-    description: The current OS version (e.g. `20.04` for 'Ubuntu 20.04').
+    description: The current OS version (e.g. `22.04` for 'Ubuntu 22.04').
 runs:
-  using: node16
+  using: node20
   main: dist/index.js
 branding:
   color: gray-dark
