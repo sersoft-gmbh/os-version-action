@@ -33,6 +33,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const exec_1 = __nccwpck_require__(514);
 const os_1 = __nccwpck_require__(37);
+const node_util_1 = __nccwpck_require__(261);
+const node_fs_1 = __nccwpck_require__(561);
 async function runCmd(cmd, ...args) {
     const output = await (0, exec_1.getExecOutput)(cmd, args.length <= 0 ? undefined : args, {
         failOnStdErr: true,
@@ -44,7 +46,19 @@ async function main() {
     let version;
     switch (process.platform) {
         case 'linux':
-            version = await runCmd('lsb_release', '-sr');
+            try {
+                version = await runCmd('lsb_release', '-sr');
+            }
+            catch (error) {
+                core.debug(`\`lsb_release\` failed with: ${error}`);
+                core.info('Could not find `lsb_release`. Falling back to `/etc/os-release`...');
+                const osReleaseVars = await (0, node_util_1.promisify)(node_fs_1.readFile)('/etc/os-release', 'utf8');
+                const versionIDRegex = /^VERSION_ID="?([0-9.]+)"?$/;
+                const matchingLine = osReleaseVars.split(os_1.EOL).find(l => versionIDRegex.test(l));
+                if (!matchingLine)
+                    throw new Error('Could not find a suitable version in `/etc/os-release`');
+                version = matchingLine.replace(versionIDRegex, '$1');
+            }
             break;
         case 'darwin':
             version = await runCmd('sw_vers', '-productVersion');
@@ -4094,6 +4108,22 @@ module.exports = require("https");
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 561:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs");
+
+/***/ }),
+
+/***/ 261:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:util");
 
 /***/ }),
 
