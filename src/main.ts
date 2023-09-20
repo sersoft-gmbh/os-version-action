@@ -1,6 +1,8 @@
 import * as core from '@actions/core';
-import { getExecOutput } from '@actions/exec';
-import { EOL } from 'os';
+import {getExecOutput} from '@actions/exec';
+import {EOL} from 'os';
+import {promisify} from 'node:util';
+import {readFile} from 'node:fs';
 
 async function runCmd(cmd: string, ...args: string[]): Promise<string> {
     const output = await getExecOutput(cmd, args.length <= 0 ? undefined : args, {
@@ -14,7 +16,18 @@ async function main() {
     let version: string;
     switch (process.platform) {
         case 'linux':
-            version = await runCmd('lsb_release', '-sr');
+            try {
+                version = await runCmd('lsb_release', '-sr');
+            } catch (error: any) {
+                core.debug(`\`lsb_release\` failed with: ${error}`);
+                core.info('Could not find `lsb_release`. Falling back to `/etc/os-release`...');
+                const osReleaseVars = await promisify(readFile)('/etc/os-release', 'utf8');
+                const versionIDRegex = /^VERSION_ID="?([0-9.]+)"?$/;
+                const matchingLine = osReleaseVars.split(EOL).find(l => versionIDRegex.test(l));
+                if (!matchingLine)
+                    throw new Error('Could not find a suitable version in `/etc/os-release`');
+                version = matchingLine.replace(versionIDRegex, '$1');
+            }
             break;
         case 'darwin':
             version = await runCmd('sw_vers', '-productVersion');

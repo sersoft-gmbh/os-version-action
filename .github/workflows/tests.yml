@@ -3,7 +3,7 @@ name: Tests
 on:
   push:
     branches: [ main ]
-    paths: 
+    paths:
       - 'dist/*.js'
       - '.github/workflows/tests.yml'
   pull_request:
@@ -71,4 +71,43 @@ jobs:
           fi
           echo "Expecting: ${EXPECTED_VERSION}"
           echo "${EXPECTED_VERSION}" | grep -q "${DETECTED_VERSION}"
+        shell: bash
+
+  test-container:
+    name: Test Action using Container
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        container: # Ubuntu containers don't have `lsb_release` installed
+          - ubuntu:20.04
+          - ubuntu:22.04
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate action code
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: ./.github/actions/generate-action-code
+      - uses: sersoft-gmbh/os-version-action@main
+        if: ${{ github.event_name == 'push' }}
+        id: os-version-main
+      - uses: './'
+        if: ${{ github.event_name == 'pull_request' }}
+        id: os-version-local
+      - id: os-version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BRANCH_VERSION: ${{ steps.os-version-main.outputs.version }}
+          LOCAL_VERSION: ${{ steps.os-version-local.outputs.version }}
+        run: |
+          if [ "${EVENT_NAME}" == 'push' ]; then
+            echo "version=${BRANCH_VERSION}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "version=${LOCAL_VERSION}" >> "${GITHUB_OUTPUT}"
+          fi
+        shell: bash
+      - name: Check for reported version
+        env:
+          CONTAINER: ${{ matrix.container }}
+          DETECTED_VERSION: ${{ steps.os-version.outputs.version }}
+        run: test "${DETECTED_VERSION}" = "${CONTAINER#*:}"
         shell: bash

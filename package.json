@@ -1,6 +1,6 @@
 {
   "name": "os-version-action",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A GitHub action that reads the operating system (OS) version.",
   "engines": {
     "node": ">=20"
