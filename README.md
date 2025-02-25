@@ -12,7 +12,7 @@ _None_
 
 ### `version`
 
-The version of the operating system this action is run on (e.g. `22.04` for Ubuntu 22.04).
+The version of the operating system this action is run on (e.g. `24.04` for Ubuntu 24.04).
 
 ## Example Usage
 

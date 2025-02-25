@@ -19,12 +19,12 @@ jobs:
           - macos-14
           - macos-15
           - macos-latest
-          - ubuntu-20.04
           - ubuntu-22.04
           - ubuntu-24.04
           - ubuntu-latest
           - windows-2019
           - windows-2022
+          - windows-2025
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
@@ -81,10 +81,11 @@ jobs:
     strategy:
       matrix:
         container: # Ubuntu containers don't have `lsb_release` installed
-          - ubuntu:20.04
           - ubuntu:22.04
           - ubuntu:23.04
           - ubuntu:23.10
+          - ubuntu:24.04
+          - ubuntu:24.10
     container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v4
