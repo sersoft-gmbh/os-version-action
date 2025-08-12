@@ -27,7 +27,7 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Generate action code
         if: ${{ github.event_name == 'pull_request' }}
         uses: ./.github/actions/generate-action-code
@@ -87,7 +87,7 @@ jobs:
           - ubuntu:24.10
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Generate action code
         if: ${{ github.event_name == 'pull_request' }}
         uses: ./.github/actions/generate-action-code
