@@ -18,7 +18,7 @@ The version of the operating system this action is run on (e.g. `24.04` for Ubun
 
 Use the following snippet to read the current os version:
 ```yaml
-uses: sersoft-gmbh/os-version-action@v3
+uses: sersoft-gmbh/os-version-action@v4
 id: os-version
 ```
 
