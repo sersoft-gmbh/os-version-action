@@ -43,8 +43,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(484));
 const exec_1 = __nccwpck_require__(236);
 const os_1 = __nccwpck_require__(857);
-const node_util_1 = __nccwpck_require__(975);
-const node_fs_1 = __nccwpck_require__(24);
+const promises_1 = __nccwpck_require__(455);
 async function runCmd(cmd, ...args) {
     const output = await (0, exec_1.getExecOutput)(cmd, args.length <= 0 ? undefined : args, {
         failOnStdErr: true,
@@ -62,7 +61,7 @@ async function main() {
             catch (error) {
                 core.debug(`\`lsb_release\` failed with: ${error}`);
                 core.info('Could not find `lsb_release`. Falling back to `/etc/os-release`...');
-                const osReleaseVars = await (0, node_util_1.promisify)(node_fs_1.readFile)('/etc/os-release', 'utf8');
+                const osReleaseVars = await (0, promises_1.readFile)('/etc/os-release', 'utf8');
                 const versionIDRegex = /^VERSION_ID="?([0-9.]+)"?$/;
                 const matchingLine = osReleaseVars.split(os_1.EOL).find(l => versionIDRegex.test(l));
                 if (!matchingLine)
@@ -3596,19 +3595,11 @@ module.exports = require("net");
 
 /***/ }),
 
-/***/ 24:
+/***/ 455:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("node:fs");
-
-/***/ }),
-
-/***/ 975:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("node:util");
+module.exports = require("node:fs/promises");
 
 /***/ }),
 
