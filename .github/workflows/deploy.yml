@@ -5,6 +5,9 @@ on:
     branches: [ main ]
     paths-ignore: [ 'dist/*.js' ]
 
+permissions:
+  contents: write
+
 jobs:
   deploy-action-code:
     name: Deploy Action Code
@@ -13,8 +16,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           token: ${{ secrets.BOT_TOKEN }}
-      - name: Generate action code
-        uses: ./.github/actions/generate-action-code
+      - uses: ./.github/actions/generate-action-code
       - name: Configure repository
         env:
           BOT_USERNAME: ${{ secrets.BOT_USERNAME }}

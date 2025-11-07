@@ -5,7 +5,7 @@ outputs:
   version:
     description: The current OS version (e.g. `24.04` for 'Ubuntu 24.04').
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
 branding:
   color: gray-dark

@@ -9,15 +9,19 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   test:
     name: Test Action
     strategy:
       matrix:
         os:
-          - macos-13
           - macos-14
           - macos-15
+          - macos-26
           - macos-latest
           - ubuntu-22.04
           - ubuntu-24.04
@@ -43,7 +47,7 @@ jobs:
           BRANCH_VERSION: ${{ steps.os-version-main.outputs.version }}
           LOCAL_VERSION: ${{ steps.os-version-local.outputs.version }}
         run: |
-          if [ "${EVENT_NAME}" == 'push' ]; then
+          if [ "${EVENT_NAME}" = 'push' ]; then
             echo "version=${BRANCH_VERSION}" >> "${GITHUB_OUTPUT}"
           else
             echo "version=${LOCAL_VERSION}" >> "${GITHUB_OUTPUT}"
@@ -81,10 +85,11 @@ jobs:
       matrix:
         container: # Ubuntu containers don't have `lsb_release` installed
           - ubuntu:22.04
-          - ubuntu:23.04
           - ubuntu:23.10
           - ubuntu:24.04
           - ubuntu:24.10
+          - ubuntu:25.04
+          - ubuntu:25.10
     container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v5
@@ -103,7 +108,7 @@ jobs:
           BRANCH_VERSION: ${{ steps.os-version-main.outputs.version }}
           LOCAL_VERSION: ${{ steps.os-version-local.outputs.version }}
         run: |
-          if [ "${EVENT_NAME}" == 'push' ]; then
+          if [ "${EVENT_NAME}" = 'push' ]; then
             echo "version=${BRANCH_VERSION}" >> "${GITHUB_OUTPUT}"
           else
             echo "version=${LOCAL_VERSION}" >> "${GITHUB_OUTPUT}"

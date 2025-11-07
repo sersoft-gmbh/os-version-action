@@ -1,8 +1,7 @@
 import * as core from '@actions/core';
 import {getExecOutput} from '@actions/exec';
 import {EOL} from 'os';
-import {promisify} from 'node:util';
-import {readFile} from 'node:fs';
+import {readFile} from 'node:fs/promises';
 
 async function runCmd(cmd: string, ...args: string[]): Promise<string> {
     const output = await getExecOutput(cmd, args.length <= 0 ? undefined : args, {
@@ -21,7 +20,7 @@ async function main() {
             } catch (error: any) {
                 core.debug(`\`lsb_release\` failed with: ${error}`);
                 core.info('Could not find `lsb_release`. Falling back to `/etc/os-release`...');
-                const osReleaseVars = await promisify(readFile)('/etc/os-release', 'utf8');
+                const osReleaseVars = await readFile('/etc/os-release', 'utf8');
                 const versionIDRegex = /^VERSION_ID="?([0-9.]+)"?$/;
                 const matchingLine = osReleaseVars.split(EOL).find(l => versionIDRegex.test(l));
                 if (!matchingLine)
